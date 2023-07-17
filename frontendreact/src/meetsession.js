@@ -29,11 +29,15 @@ export default function MeetSession() {
     });
     peerRef.current.on("call", (call) => {
       call.answer(userMediaStream);
-      call.on("stream", (remoteStream) => {
-        remoteVideoRef.current.srcObject = remoteStream;
-        remoteVideoRef.current.play();
-        // setConnected(true);
-      });
+      try {
+        call.on("stream", (remoteStream) => {
+          remoteVideoRef.current.srcObject = remoteStream;
+          remoteVideoRef.current.play();
+          setConnected(true);
+        });
+      } catch (err) {
+        console.log(err);
+      }
     });
     console.log("dsd");
     // copy peer id to clipboard
@@ -47,6 +51,7 @@ export default function MeetSession() {
       try {
         remoteVideoRef.current.srcObject = remoteStream;
         remoteVideoRef.current.play();
+        setConnected(true);
       } catch (err) {
         console.log(err);
       }
