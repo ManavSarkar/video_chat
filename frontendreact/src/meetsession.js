@@ -1,4 +1,3 @@
-"use client";
 import Peer from "peerjs";
 import { useEffect, useRef, useState } from "react";
 export default function MeetSession() {
@@ -7,7 +6,6 @@ export default function MeetSession() {
   const localVideoRef = useRef();
   const remoteVideoRef = useRef();
   const [connected, setConnected] = useState(false);
-  const copyButtonRef = useRef();
   useEffect(() => {
     let userMediaStream;
 
@@ -34,24 +32,11 @@ export default function MeetSession() {
       call.on("stream", (remoteStream) => {
         remoteVideoRef.current.srcObject = remoteStream;
         remoteVideoRef.current.play();
-        setConnected(true);
+        // setConnected(true);
       });
     });
-
-    // on remote peer disconnect
-    peerRef.current.on("close", () => {
-      console.log("disconnected");
-      remoteVideoRef.current.srcObject = null;
-    });
-    peerRef.current.on("error", () => {
-      console.log("disconnected");
-      remoteVideoRef.current.srcObject = null;
-    });
-
+    console.log("dsd");
     // copy peer id to clipboard
-    copyButtonRef.current.addEventListener("click", () => {
-      navigator.clipboard.writeText(peerID);
-    });
   }, []);
 
   const callPeer = (e) => {
@@ -59,9 +44,13 @@ export default function MeetSession() {
     const peerID = document.getElementById("peerID").value;
     const call = peerRef.current.call(peerID, localVideoRef.current.srcObject);
     call.on("stream", (remoteStream) => {
-      remoteVideoRef.current.srcObject = remoteStream;
-      remoteVideoRef.current.play();
-      setConnected(true);
+      try {
+        remoteVideoRef.current.srcObject = remoteStream;
+        remoteVideoRef.current.play();
+      } catch (err) {
+        console.log(err);
+      }
+      //   remoteVideoRef.current.srcObject = remoteStream;
     });
   };
   const muteAudio = () => {
@@ -87,7 +76,9 @@ export default function MeetSession() {
       <br />
       <p className="text-3xl text-center">Your Peer ID: {peerID}</p>
       <button
-        ref={copyButtonRef}
+        onClick={() => {
+          navigator.clipboard.writeText(peerID);
+        }}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold w-40 py-2 px-4 rounded mx-auto text-center"
       >
         Copy Peer ID
@@ -98,7 +89,6 @@ export default function MeetSession() {
           <div className="flex flex-col justify-center items-center m-4">
             <video
               className="w-96 h-72"
-              autoPlay
               playsInline
               id="localVideo"
               ref={localVideoRef}
@@ -109,8 +99,6 @@ export default function MeetSession() {
           <div className="flex flex-col justify-center items-center m-4">
             <video
               className="w-96 h-72"
-              autoPlay
-              playsInline
               id="localVideo"
               ref={remoteVideoRef}
             ></video>
